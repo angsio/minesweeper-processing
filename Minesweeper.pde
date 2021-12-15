@@ -1,7 +1,7 @@
 boolean started = false;
 
-int sizeX = 100;
-int sizeY = 100;
+int sizeX = 300;
+int sizeY = 300;
 
 // the MAINFRAME has been INITIALIZED, WOOOO
 Functionality system = new Functionality();
@@ -27,8 +27,8 @@ class tileSquare {
   int posX = 0;
   int posY = 0;
   
-  // grey tile
-  int status = -2;
+  // empty
+  int status = 0;
   
   // 0 = empty
   // 1 = 1 mines around
@@ -49,12 +49,6 @@ class tileSquare {
     fill(0);
     text(status, posX + 8, posY + 18);
   }
-  
-  void mineOrNot() {
-    if (int(random(0, 10)) == 9) {
-      status = 9;
-    }
-  }
 }
 
 // click
@@ -64,7 +58,7 @@ void mousePressed() {
     for (int sMP = 0; sMP < system.tiles.length; sMP++) {
       if (mouseX > system.tiles[sMP].posX && mouseX < system.tiles[sMP].posX + 25 && mouseY > system.tiles[sMP].posY && mouseY < system.tiles[sMP].posY + 25) {
         println("Tile " + (sMP + 1) + " has been clicked");
-        
+
         system.tiles[sMP].renderStatus();
         
         break;
@@ -86,17 +80,12 @@ void mousePressed() {
         system.tiles[wtf].posX = i*25;
         system.tiles[wtf].posY = j*25;
         system.tiles[wtf].renderPure();
-        
       }
     }
     
-    // MAKE MINES BABY
-    for (int makeMines = 0; makeMines < system.tiles.length; makeMines ++) {
-      system.tiles[makeMines].status = int(random(-2, 1));
-      println(system.tiles[makeMines].status);
-    }
+    system.makeMines();
     
-    //system.makeMines();
+    system.primeMines();
   
     started = true;
     
@@ -107,71 +96,72 @@ void mousePressed() {
 class Functionality {
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
+  int[] mines = new int[((sizeX / 25) * (sizeY / 25)) / 4];
+  
   // add tile objects to tiles array
   void addTileSquares() {
     for (int indexOfTiles = 0; indexOfTiles < tiles.length; indexOfTiles++) {
       tiles[indexOfTiles] = new tileSquare();
     }
-    
-    println(tiles.length);
   }
   
-  //void makeMines() {
+  void makeMines() {
     
-  //  // # of mines is half of squares
-  //  int[] mines = new int[((sizeX / 25) * (sizeY / 25)) / 2];
+    // 2x2 is 4 mines.
     
-  //  // 4x4 is 8 mines.
+    // random number between 0 and however many tiles there are
+    int rand;
     
-  //  // random number between 0 and however many tiles there are
-  //  int rand;
+    // What To Choose From. Array of available tiles, all to choose from in the start.
+    int[] wTCF = new int[(sizeX / 25) * (sizeY / 25)];
     
-  //  // What To Choose From. Array of available tiles, all to choose from in the start.
-  //  int[] wTCF = new int[(sizeX / 25) * (sizeY / 25)];
+    // EX: choose from 4 tiles
     
-  //  // choose from 16 tiles
+    // adds actual numbers to declared array.
+    for (int m = 0; m < wTCF.length; m ++) {
+      wTCF[m] = m;
+    }
     
-  //  // adds actual numbers to declared array.
-  //  for (int m = 0; m < wTCF.length; m ++) {
-  //    wTCF[m] = m;
-  //  }
+    // wTCF = {0, 1, 2, 3};
     
-  //  // wTCF = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    
-  //  for (int L = 0; L < mines.length; L++) {
+    for (int L = 0; L < mines.length; L++) {
       
-  //    // chooses random tile, ex 9
-  //    rand  = int(random(0, wTCF.length - 1));
+      // chooses random index
+      rand  = int(random(0, wTCF.length));
       
-  //    // chooses 9th index (10th tile)
-  //    mines[L] = wTCF[rand];
+      // sets mine tile in array as index
+      mines[L] = wTCF[rand];
       
-  //    // creates new array thats one shorter in length
-  //    int[] newWtcf = new int[wTCF.length - 1];
+      // creates new array thats one shorter in length
+      int[] newWtcf = new int[wTCF.length - 1];
       
-  //    // What I need:
-  //    // wTCF = {0, 1, 2, 3, 4, 5, 6, 7, 8, (SKIPS 9 BECAUSE IT WAS CHOSEN) 10, 11, 12, 13, 14, 15}
+      // What I need:
+      // wTCF = {0, 1, 2, 3};
       
-  //    for (int h = 0; h < newWtcf.length; h++) {
-  //      if (h == rand) {
-  //        continue;
-  //      }
-  //        // wTCF = {0, 1, 2, 3};
+      // starts at first index, goes up until the length of the new array
+      for (int h = 0, t = 0; h < wTCF.length; h++) {
+        
+        // if the index was the index that was chosen last time, skip it
+        
+        // if h == 1
+        if (h == rand) {
+          continue;
+        }
+        
+        // wTCF = {0, 1, 2, 3};
           
-  //        // newWtcf
-  //        newWtcf[h] = wTCF[h];
-  //    }
+        // newWtcf
+        newWtcf[t++] = wTCF[h];
+      }
       
-  //    wTCF = newWtcf;
-  //  }
-
-  //  println(mines);
-  //}
+      wTCF = newWtcf;
+    }
+    println(sort(mines));
+  }
+  
+  void primeMines() {
+    for (int g = 0; g < mines.length; g++) {
+      tiles[ (mines[g]) ].status = -1;
+    }  
+  }
 }
-
-//void test(int nMines, int n) {
-//  int[] allSquares = new int[n];
-//  for (int i = 0; i < n; i++) {
-     
-//  }
-//}
