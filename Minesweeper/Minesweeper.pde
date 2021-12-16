@@ -1,7 +1,7 @@
 boolean started = false;
 
-int sizeX = 300;
-int sizeY = 300;
+int sizeX = 200;
+int sizeY = 200;
 
 // the MAINFRAME has been INITIALIZED, WOOOO
 Functionality system = new Functionality();
@@ -47,7 +47,13 @@ class tileSquare {
     fill(255);
     rect(posX, posY, 25, 25);
     fill(0);
-    text(status, posX + 8, posY + 18);
+    if (status != 0) {
+      text(status, posX + 8, posY + 18);
+      
+      if (status == -1) {
+        ellipse(posX + 12.5, posY + 12.5, 20, 20);
+      }
+    }  
   }
 }
 
@@ -86,6 +92,8 @@ void mousePressed() {
     system.makeMines();
     
     system.primeMines();
+    
+    system.setTiles();
   
     started = true;
     
@@ -96,7 +104,7 @@ void mousePressed() {
 class Functionality {
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
-  int[] mines = new int[((sizeX / 25) * (sizeY / 25)) / 4];
+  int[] mines = new int[10];
   
   // add tile objects to tiles array
   void addTileSquares() {
@@ -163,5 +171,36 @@ class Functionality {
     for (int g = 0; g < mines.length; g++) {
       tiles[ (mines[g]) ].status = -1;
     }  
+  }
+  
+  void setTiles() {
+    
+    int lmao;
+    
+    for (int f = 0; f < tiles.length; f++) {
+      if (tiles[f].status == -1) {
+        continue;
+      }
+      
+      lmao = f - (sizeY/25) - 1;
+      
+      // dont even question it, simply accept it
+      
+      // example if 5, goes while less than 14 
+      for (int i = lmao; i < lmao + (2*(sizeY/25) + 1); i += sizeY/25) {
+        
+        // scales from 0 to 2
+        for (int j = 0; j < 3; j++) {
+          
+          if (i + j < 0 || i + j > tiles.length - 1 || ((f + 1) % (sizeY/25) == 0 && j == 2) || (f % (sizeY/25) == 0 && j == 0)) {
+            continue;
+          }
+          
+          if (tiles[i + j].status == -1) {
+              tiles[f].status++;
+          }
+        }
+      }
+    }
   }
 }
