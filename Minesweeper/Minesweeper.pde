@@ -1,7 +1,7 @@
 boolean started = false;
 
-int sizeX = 100;
-int sizeY = 100;
+int sizeX = 300;
+int sizeY = 300;
 
 int howManyRendered = 0;
 
@@ -83,9 +83,9 @@ void mousePressed() {
           
         }
         
-        //else if (system.tiles[sMP].status == 0) {
-        
-        //}
+        else if (system.tiles[sMP].status == 0) {
+          system.scanTiles(sMP, "blanks");
+        }
         
         // if clicked on anything but a mine, a tile was clicked and the counter increases
         else {
@@ -121,6 +121,8 @@ void mousePressed() {
       }
     }
     
+    
+    // MAKE, PRIME, SET <-- how to be dangerous with mines
     system.makeMines();
     
     system.primeMines();
@@ -136,7 +138,8 @@ void mousePressed() {
 class Functionality {
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
-  int[] mines = new int[4];
+  // how many mines you want, put in the second pair of square brackets
+  int[] mines = new int[20];
   
   // add tile objects to tiles array
   void addTileSquares() {
@@ -145,6 +148,7 @@ class Functionality {
     }
   }
   
+  // updates the mines array to random tiles
   void makeMines() {
     
     // 2x2 is 4 mines.
@@ -199,12 +203,14 @@ class Functionality {
     println(sort(mines));
   }
   
+  // sets mines to whatever the array has
   void primeMines() {
     for (int g = 0; g < mines.length; g++) {
-      tiles[ (mines[g]) ].status = -1;
+      tiles[(mines[g])].status = -1;
     }  
   }
   
+  // sets the tiles that are not mines to numbers that match the surrounding quantity of mines
   void setTiles() {
     
     for (int f = 0; f < tiles.length; f++) {
@@ -219,28 +225,36 @@ class Functionality {
   // WTSF = mines means to scan for mines
   // WTSF = blanks means to scan for blank tiles
   void scanTiles(int tileIndex, String wTSF) {
+
     int scanner = tileIndex - (sizeY/25) - 1;
       
-      // dont even question it, simply accept it
+    // dont even question it, simply accept it
       
-      // example if 5, goes while less than 14 
-      for (int i = scanner; i < scanner + (2*(sizeY/25) + 1); i += sizeY/25) {
+    // example if 5, goes while less than 14 
+    for (int i = scanner; i < scanner + (2*(sizeY/25) + 1); i += sizeY/25) {
+      
+      // scales from 0 to 2
+      for (int j = 0; j < 3; j++) {
         
-        // scales from 0 to 2
-        for (int j = 0; j < 3; j++) {
-          
-          if (i + j < 0 || i + j > tiles.length - 1 || ((tileIndex + 1) % (sizeY/25) == 0 && j == 2) || (tileIndex % (sizeY/25) == 0 && j == 0)) {
-            continue;
-          }
-          
-          if (wTSF == "mines" && tiles[i + j].status == -1) {
-            tiles[tileIndex].status++;
-          }
-          else if (wTSF == "blanks" && tiles[i + j].status == 0) {
+        if (i + j < 0 || i + j > tiles.length - 1 || ((tileIndex + 1) % (sizeY/25) == 0 && j == 2) || (tileIndex % (sizeY/25) == 0 && j == 0)) {
+          continue;
+        }
+        
+        // if scanning for mines and the status of the tile being scanned is -1 (mine) then it will increase the tileIndexes status by 1
+        if (wTSF == "mines" && tiles[i + j].status == -1) {
+          tiles[tileIndex].status++;
+        }
+        
+        // if scanning for blanks
+        else if (wTSF == "blanks") {
+          if (tiles[i + j].status == 0 && tiles[i + j].rendered == false) {
             tiles[i + j].renderStatus();
+            system.scanTiles(i + j, "blanks");
           }
+          tiles[i + j].renderStatus();
         }
       }
+    }
   }
 }
 
