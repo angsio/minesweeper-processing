@@ -1,7 +1,7 @@
 boolean started = false;
 
-int sizeX = 300;
-int sizeY = 300;
+int sizeX = 1000;
+int sizeY = 1000;
 
 int howManyRendered = 0;
 
@@ -17,7 +17,30 @@ void settings() {
 }
 
 void setup() {
+  // add the objects to array to use below
+    system.addTileSquares();
+    
+    for (int i = 0; i < sizeX/25; i++) {
+      
+      for (int  j = 0; j < sizeY/25; j++) {
+        
+        int wtf = ( j + (i * (sizeY / 25)) );
+        
+        system.tiles[wtf].posX = i*25;
+        system.tiles[wtf].posY = j*25;
+        system.tiles[wtf].renderPure();
+      }
+    }
+    
+    
+    // MAKE, PRIME, SET <-- how to be dangerous with mines
+    system.makeMines();
+    
+    system.primeMines();
+    
+    system.setTiles();
   
+    started = true;
 }
 
 // draw
@@ -52,7 +75,7 @@ class tileSquare {
     rect(posX, posY, 25, 25);   
   }
   
-  // its empteh, or is it?
+  // renders an open tile with its status. If 0, draws blank instead. If -1, draws mine instead
   void renderStatus() {
     fill(255);
     rect(posX, posY, 25, 25);
@@ -72,74 +95,89 @@ class tileSquare {
 // click
 void mousePressed() {
   
-  if (started) {
+  if (mouseButton == LEFT) {
     for (int sMP = 0; sMP < system.tiles.length; sMP++) {
-      if (mouseX > system.tiles[sMP].posX && mouseX < system.tiles[sMP].posX + 25 && mouseY > system.tiles[sMP].posY && mouseY < system.tiles[sMP].posY + 25 && system.tiles[sMP].flagged == false && system.tiles[sMP].rendered == false) {
-        println("Tile " + (sMP + 1) + " has been clicked");
-        
-        // if click on  mine, exit the app (temporary, will implement game states later)
-        if (system.tiles[sMP].status == -1) {
-          system.tiles[sMP].renderStatus();
+      if (mouseX > system.tiles[sMP].posX && mouseX < system.tiles[sMP].posX + 25 && mouseY > system.tiles[sMP].posY && mouseY < system.tiles[sMP].posY + 25 && system.tiles[sMP].flagged == false) {
+      
+        if (system.tiles[sMP].rendered == false) {
           
+          howManyRendered = 0;
+          
+          // if click on  mine, exit the app (temporary, will implement game states later)
+          if (system.tiles[sMP].status == -1) {
+            system.tiles[sMP].renderStatus();
+            exit();
+          }
+          
+          // if clicked on blank, use recursion to clear all blanks around it up until a number
+          else if (system.tiles[sMP].status == 0) {
+            system.scanTiles(sMP, "blanks");
+          }
+          
+          // if clicked on anything but a mine, a tile was clicked and the counter increases
+          else {
+            system.tiles[sMP].renderStatus();
+          }
+          
+          // always counts if the goal of the game is met
+          for (int renders = 0; renders < system.tiles.length; renders++) {
+            if (system.tiles[renders].rendered) {
+              howManyRendered++;
+            }
+          }
+          
+          // if clicked on all non-mines, temporary win screen
+          if (howManyRendered == system.tiles.length - system.mines.length) {
+            background(255);
+            text("nice you win", 25, 25);
+          }
+          
+          break;
         }
         
-        else if (system.tiles[sMP].status == 0) {
-          system.scanTiles(sMP, "blanks");
-        }
-        
-        // if clicked on anything but a mine, a tile was clicked and the counter increases
+        // scans for non-flags to reveal tiles around a square
         else {
-          system.tiles[sMP].renderStatus();
-          howManyRendered++;
-        }
-
-        // if clicked on all non-mines, temporary win screen
-        if (howManyRendered == system.tiles.length - system.mines.length) {
-          background(255);
-          text("nice you win bruvva", 25, 25);
+          system.scanTiles(sMP, "non-flags");
         }
         
-        break;
       }
     }
   }
   
-  else {
+  else if (mouseButton == RIGHT) {
     
-    // add the objects to array to use below
-    system.addTileSquares();
-    
-    for (int i = 0; i < sizeX/25; i++) {
-      
-      for (int  j = 0; j < sizeY/25; j++) {
+    // which tile was clicked mechanic
+    for (int m = 0; m < system.tiles.length; m++) {
+      if (mouseX > system.tiles[m].posX && mouseX < system.tiles[m].posX + 25 && mouseY > system.tiles[m].posY && mouseY < system.tiles[m].posY + 25) {
         
-        int wtf = ( j + (i * (sizeY / 25)) );
         
-        system.tiles[wtf].posX = i*25;
-        system.tiles[wtf].posY = j*25;
-        system.tiles[wtf].renderPure();
+        // flag a tile
+        // tile must not be flagged and must be unrendered
+        if (system.tiles[m].rendered == false && system.tiles[m].flagged == false) {
+          fill(0);
+          square(system.tiles[m].posX + 6, system.tiles[m].posY + 6, 12.5); // draws square to indicate flag (temporary)
+          system.tiles[m].flagged = true; // makes it flagged
+        }
+        
+        
+        // unflag a tile
+        // tile must be flagged already and unrendered
+        else if (system.tiles[m].flagged && system.tiles[m].rendered == false) {
+          fill(175);
+          system.tiles[m].renderPure(); // draws it pure again, hiding status
+          system.tiles[m].flagged = false; // turns it into unflagged
+        }
       }
     }
-    
-    
-    // MAKE, PRIME, SET <-- how to be dangerous with mines
-    system.makeMines();
-    
-    system.primeMines();
-    
-    system.setTiles();
-  
-    started = true;
-    
   }
 }
 
-
+// handles most processes
 class Functionality {
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
   // how many mines you want, put in the second pair of square brackets
-  int[] mines = new int[20];
+  int[] mines = new int[300];
   
   // add tile objects to tiles array
   void addTileSquares() {
@@ -200,7 +238,6 @@ class Functionality {
       
       wTCF = newWtcf;
     }
-    println(sort(mines));
   }
   
   // sets mines to whatever the array has
@@ -246,39 +283,30 @@ class Functionality {
         }
         
         // if scanning for blanks
+        
+        // i cant even explain this it just works
         else if (wTSF == "blanks") {
           if (tiles[i + j].status == 0 && tiles[i + j].rendered == false) {
             tiles[i + j].renderStatus();
             system.scanTiles(i + j, "blanks");
           }
           tiles[i + j].renderStatus();
-        }
-      }
-    }
-  }
-}
-
-
-void keyPressed() {
-  
-  if (keyCode == TAB) {
-    for (int m = 0; m < system.tiles.length; m++) {
-      if (mouseX > system.tiles[m].posX && mouseX < system.tiles[m].posX + 25 && mouseY > system.tiles[m].posY && mouseY < system.tiles[m].posY + 25) {
-        
-        
-        // flag a tile
-        if (system.tiles[m].rendered == false && system.tiles[m].flagged == false) {
-          fill(0);
-          square(system.tiles[m].posX + 6, system.tiles[m].posY + 6, 12.5);
-          system.tiles[m].flagged = true;
+          
         }
         
-        
-        // unflag a tile
-        else if (system.tiles[m].flagged && system.tiles[m].rendered == false) {
-          fill(175);
-          system.tiles[m].renderPure();
-          system.tiles[m].flagged = false;
+        else if (wTSF == "non-flags") {
+          if (!tiles[i + j].flagged && !tiles[i + j].rendered) {
+            tiles[i + j].renderStatus();
+            
+            if (tiles[i + j].status == -1) {
+              exit();
+            }
+            
+            if (tiles[i + j].status == 0) {
+              scanTiles(i + j, "blanks");
+            }
+            
+          }
         }
       }
     }
