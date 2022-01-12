@@ -222,6 +222,7 @@ class Functionality {
                   else if (tiles[h + o].status != -1) {
                     tiles[h + o].renderStatus();
                   }
+                  
                   else {
                     tiles[h + o].renderMine();
                     result = "lose!";

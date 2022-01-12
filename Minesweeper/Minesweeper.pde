@@ -4,8 +4,8 @@ boolean playing = true;
 
 String result;
 
-int sizeX = 200;
-int sizeY = 200;
+int sizeX = 400;
+int sizeY = 400;
 
 int howManyRendered = 0;
 
@@ -45,8 +45,6 @@ void mousePressed() {
         
           if (!system.tiles[sMP].rendered) {
             
-            howManyRendered = 0;
-            
             // if click on  mine, exit the app (temporary, will implement game states later)
             if (system.tiles[sMP].status == -1) {
               system.tiles[sMP].renderMine();
@@ -64,12 +62,7 @@ void mousePressed() {
               system.tiles[sMP].renderStatus();
             }
             
-            // always counts if the goal of the game is met
-            for (int renders = 0; renders < system.tiles.length; renders++) {
-              if (system.tiles[renders].rendered) {
-                howManyRendered++;
-              }
-            }            
+                        
           }
           
           // scans for non-flags to reveal tiles around a square
@@ -77,16 +70,27 @@ void mousePressed() {
             system.scanTiles(sMP, "non-flags");
           }
           
-          // if clicked on all non-mines, temporary win screen
-          if (howManyRendered >= system.tiles.length - system.mines.length) {
-            background(255);
-            text("nice you win", 25, 25);
-          }
-          
           break;
           
         }
       }
+      // counts how many rendered to then match
+      howManyRendered = 0;
+      
+      // always counts if the goal of the game is met
+      for (int renders = 0; renders < system.tiles.length; renders++) {
+        if (system.tiles[renders].rendered) {
+          howManyRendered++;
+        }
+      }
+      // if clicked on all non-mines, temporary win screen
+      if (howManyRendered >= system.tiles.length - system.mines.length) {
+        result = "win!";
+        system.endGame();
+      }
+      
+      println(howManyRendered);
+          
     }
     
     else if (mouseButton == RIGHT) {
