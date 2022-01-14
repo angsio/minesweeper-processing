@@ -4,8 +4,10 @@ boolean playing = true;
 
 String result;
 
-int sizeX = 400;
-int sizeY = 400;
+int sizeX = 300;
+int sizeY = 300;
+
+int howManyFlags = 0;
 
 int howManyRendered = 0;
 
@@ -16,9 +18,12 @@ PImage flag;
 // the MAINFRAME has been INITIALIZED, WOOOO
 Functionality system = new Functionality();
 
+// Display to show important information
+Display display = new Display();
+
 // size
 void settings() {
-  size(sizeX + 1, sizeY + 51);
+  size(sizeX + 1, sizeY + 21);
   
 }
 
@@ -27,11 +32,15 @@ void setup() {
   flag = loadImage("minesweeperflag.png");
   
   system.gameSetup();
+  
+  
 }
 
 // draw
 void draw() {
 
+  display.updateDisplays(system.mines.length);
+  
 }
 
 // click
@@ -89,8 +98,6 @@ void mousePressed() {
         system.endGame();
       }
       
-      println(howManyRendered);
-          
     }
     
     else if (mouseButton == RIGHT) {
@@ -98,13 +105,14 @@ void mousePressed() {
       // which tile was clicked mechanic
       for (int m = 0; m < system.tiles.length; m++) {
         if (mouseX > system.tiles[m].posX && mouseX < system.tiles[m].posX + 25 && mouseY > system.tiles[m].posY && mouseY < system.tiles[m].posY + 25) {
-          
+
           
           // flag a tile
           // tile must not be flagged and must be unrendered
           if (!system.tiles[m].rendered && !system.tiles[m].flagged) {
-            image(flag, system.tiles[m].posX + 5, system.tiles[m].posY + 5);
+            image(flag, system.tiles[m].posX + 5, system.tiles[m].posY + 5); // places flag image at tile
             system.tiles[m].flagged = true; // makes it flagged
+            howManyFlags++;
           }
           
           
@@ -114,6 +122,7 @@ void mousePressed() {
             fill(175);
             system.tiles[m].renderPure(); // draws it pure again, hiding status
             system.tiles[m].flagged = false; // turns it into unflagged
+            howManyFlags--;
           }
           
           break;
@@ -121,6 +130,7 @@ void mousePressed() {
         }
       }
     }
+    
   }
   
   // IF IN END-SCREEN

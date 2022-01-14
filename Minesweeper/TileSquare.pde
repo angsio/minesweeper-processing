@@ -26,6 +26,10 @@ class tileSquare {
   }
   
   void renderMine() {
+    
+    stroke(0);
+    strokeWeight(1);
+    
     fill(255);
     square(posX, posY, 25);
     fill(0);
@@ -34,6 +38,10 @@ class tileSquare {
   
   // renders an open tile with its status. If 0, draws blank instead. If -1, draws mine instead
   void renderStatus() {
+    
+    stroke(0);
+    strokeWeight(1);
+    
     fill(255);
     square(posX, posY, 25);
     fill(0);

@@ -4,6 +4,11 @@ class Functionality {
   // GAME START FUNCTION
   void gameSetup() {
     
+    display.update = true;
+    
+    howManyFlags = 0;
+    display.time = millis();
+    
     strokeWeight(1);
     stroke(0);
     
@@ -37,6 +42,9 @@ class Functionality {
   // LITTLE END SCREEN
   void endGame() {
     
+    // stops display from updating
+    display.update = false;
+    
     // STOPS FUNCTIONALITY OF GAME
     playing = false;
     
@@ -44,7 +52,7 @@ class Functionality {
     int rectANGLE_Y = (sizeY/2) - (sizeY/5);
     
     // aesthetic
-    fill(25, 200, 255, 130);
+    fill(25, 200, 255, 160);
     stroke(150, 100, 255, 130);
     strokeWeight(4);
     
@@ -59,8 +67,8 @@ class Functionality {
     }
     
     
-    
-   text ("Click to play again.", rectANGLE_X + 10, rectANGLE_Y + 100);
+    // extra text
+    text ("Click to play again.", rectANGLE_X + 10, rectANGLE_Y + 100);
     
     
   }
@@ -68,11 +76,11 @@ class Functionality {
   
   
   
-  
+  // array of tiles
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
   // how many mines you want, put in the second pair of square brackets
-  int[] mines = new int[10];
+  int[] mines = new int[5];
   
   // add tile objects to tiles array
   void addTileSquares() {
