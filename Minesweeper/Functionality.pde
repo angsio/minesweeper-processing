@@ -80,7 +80,7 @@ class Functionality {
   tileSquare[] tiles = new tileSquare[(sizeX / 25) * (sizeY / 25)];
   
   // how many mines you want, put in the second pair of square brackets
-  int[] mines = new int[5];
+  int[] mines = new int[20];
   
   // add tile objects to tiles array
   void addTileSquares() {

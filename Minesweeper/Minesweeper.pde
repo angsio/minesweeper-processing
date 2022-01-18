@@ -39,6 +39,7 @@ void setup() {
 // draw
 void draw() {
 
+  // constantly update the Display
   display.updateDisplays(system.mines.length);
   
 }
