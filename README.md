@@ -1,9 +1,4 @@
 # minesweeper-processing
-minesweepa made in processin'
-
-
-WELCOME TO MINESWEEPER BY GITHUBFORSCHOOL-420
-
 The classic retro minesweeper game made in processing!
 
 Features:
